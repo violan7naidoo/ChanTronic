@@ -4,12 +4,34 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Phone, Mail, MapPin, Copy, Check } from 'lucide-react';
+import { Phone, Mail, MapPin, Copy, Check, Send, Loader2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { toast } from 'sonner';
+
+const formSchema = z.object({
+  name: z.string().min(2, 'Name is required'),
+  email: z.string().email('Invalid email address'),
+  message: z.string().min(10, 'Message must be at least 10 characters'),
+});
+
+type FormData = z.infer<typeof formSchema>;
 
 export default function ContactSection() {
   const [copiedItem, setCopiedItem] = useState<string | null>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+  });
 
   useEffect(() => {
     setIsMounted(true);
@@ -21,6 +43,34 @@ export default function ContactSection() {
         setCopiedItem(itemName);
         setTimeout(() => setCopiedItem(null), 2000);
       });
+    }
+  };
+
+  const onSubmit = async (data: FormData) => {
+    try {
+      setIsSubmitting(true);
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to send message');
+      }
+
+      toast.success('Message sent successfully!');
+      reset();
+    } catch (error) {
+      console.error('Error sending message:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to send message';
+      toast.error(errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
   };
   
@@ -35,18 +85,19 @@ export default function ContactSection() {
       copyValue: '+27844550036'
     },
     {
+      icon: Phone, 
+      label: 'Phone 2',
+      value: '+27 (0)86 560 8940',
+      copyValue: '+27865608940'
+    },
+    {
       icon: Mail,
       label: 'Email',
       value: 'chantronic@xis.co.za',
       href: 'mailto:chantronic@xis.co.za',
       copyValue: 'chantronic@xis.co.za'
     },
-    {
-      icon: Phone, // Using Phone icon for Fax as there's no dedicated Fax icon in Lucide
-      label: 'Fax',
-      value: '+27 (0)86 560 8940',
-      copyValue: '+27865608940'
-    },
+    
     {
       icon: MapPin,
       label: 'Website',
@@ -106,30 +157,64 @@ export default function ContactSection() {
             ))}
           </div>
 
-          <div className="p-8 bg-card rounded-lg shadow-xl animate-fade-in border border-border" style={{ animationDelay: '0.4s' }}>
+          <div className="bg-card rounded-xl p-8 shadow-lg animate-fade-in" style={{ animationDelay: '0.4s' }}>
             <h3 className="text-2xl font-semibold text-foreground mb-6">Send us a Message</h3>
-            <form action="#" method="POST" className="space-y-6">
-              <div>
-                <Label htmlFor="name" className="block text-sm font-medium text-foreground">Full Name</Label>
-                <Input type="text" name="name" id="name" required className="mt-1 block w-full rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="name">Name</Label>
+                <Input 
+                  id="name" 
+                  placeholder="Your name" 
+                  {...register('name')}
+                  className={errors.name ? 'border-destructive' : ''}
+                />
+                {errors.name && (
+                  <p className="text-sm text-destructive">{errors.name.message}</p>
+                )}
               </div>
-              <div>
-                <Label htmlFor="email" className="block text-sm font-medium text-foreground">Email Address</Label>
-                <Input type="email" name="email" id="email" required className="mt-1 block w-full rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input 
+                  id="email" 
+                  type="email" 
+                  placeholder="your.email@example.com" 
+                  {...register('email')}
+                  className={errors.email ? 'border-destructive' : ''}
+                />
+                {errors.email && (
+                  <p className="text-sm text-destructive">{errors.email.message}</p>
+                )}
               </div>
-              <div>
-                <Label htmlFor="phone" className="block text-sm font-medium text-foreground">Phone Number (Optional)</Label>
-                <Input type="tel" name="phone" id="phone" className="mt-1 block w-full rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+              <div className="space-y-2">
+                <Label htmlFor="message">Message</Label>
+                <Textarea 
+                  id="message" 
+                  placeholder="How can we help you?" 
+                  rows={5} 
+                  {...register('message')}
+                  className={errors.message ? 'border-destructive' : ''}
+                />
+                {errors.message && (
+                  <p className="text-sm text-destructive">{errors.message.message}</p>
+                )}
               </div>
-              <div>
-                <Label htmlFor="message" className="block text-sm font-medium text-foreground">Message</Label>
-                <Textarea name="message" id="message" rows={4} required className="mt-1 block w-full rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-              </div>
-              <div>
-                <Button type="submit" className="w-full bg-accent hover:bg-primary text-accent-foreground transition-colors py-3 px-6 text-base rounded-md shadow-md">
-                  Send Message
-                </Button>
-              </div>
+              <Button 
+                type="submit" 
+                className="w-full"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Send className="mr-2 h-4 w-4" />
+                    Send Message
+                  </>
+                )}
+              </Button>
             </form>
           </div>
         </div>

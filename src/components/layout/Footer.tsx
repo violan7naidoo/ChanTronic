@@ -1,14 +1,15 @@
 
 import Link from 'next/link';
+import { SiTiktok } from 'react-icons/si';
 import { Facebook, Instagram, Linkedin, Twitter, ShieldCheck, Link2 } from 'lucide-react'; // Using ShieldCheck as logo, Link2 for TikTok
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   const socialLinks = [
-    { name: 'Facebook', href: 'https://facebook.com', icon: Facebook },
+    { name: 'Facebook', href: 'https://www.facebook.com/profile.php?id=100063522873911', icon: Facebook },
     { name: 'Instagram', href: 'https://instagram.com', icon: Instagram },
-    { name: 'TikTok', href: 'https://tiktok.com', icon: Link2 }, // Using Link2 for TikTok as a generic link icon
+    { name: 'TikTok', href: 'https://www.tiktok.com/@chan.hariram', icon: SiTiktok  }, // Using Link2 for TikTok as a generic link icon
   ];
 
   return (
@@ -53,12 +54,13 @@ export default function Footer() {
             </div>
             <p className="text-sm">Phone: <a href="tel:+27844550036" className="hover:text-primary transition-colors">+27 (0)84 455 0036</a></p>
             <p className="text-sm">Email: <a href="mailto:chantronic@xis.co.za" className="hover:text-primary transition-colors">chantronic@xis.co.za</a></p>
+            <p className="text-sm">Website: <a href="https://chantronic.co.za" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">chantronic.co.za</a></p>
           </div>
         </div>
 
         <div className="border-t border-background/20 pt-8 text-center text-sm">
           <p>&copy; {currentYear} ChanTronic Solutions (PTY) LTD. All rights reserved.</p>
-          <p className="mt-1">Website: <a href="https://chantronic.co.za" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">chantronic.co.za</a></p>
+         
         </div>
       </div>
     </footer>

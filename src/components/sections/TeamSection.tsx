@@ -11,14 +11,14 @@ const teamMembers = [
     imageHint: 'professional male'
   },
   {
-    name: 'Ms. Thandi',
+    name: 'John Doe',
     role: 'Operations Manager',
     bio: 'Ensuring smooth project execution and exceptional client satisfaction.',
     imageSrc: 'https://placehold.co/400x400.png',
     imageHint: 'professional female'
   },
   {
-    name: 'John Doe',
+    name: 'Richard Roe',
     role: 'Senior Installer',
     bio: 'Specializing in complex installations and system integrations.',
     imageSrc: 'https://placehold.co/400x400.png',
